@@ -3,3 +3,4 @@ __pycache__/
 test_output.pdf
 *.egg-info/
 .env
+.streamlit/secrets.toml
