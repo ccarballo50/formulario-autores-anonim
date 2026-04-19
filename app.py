@@ -194,12 +194,16 @@ else:
 
     # ── Autenticación ─────────────────────────────────────────────────────────
     def check_password() -> bool:
-        try:
-            admin_pwd = st.secrets["email"]["admin_password"]
-        except Exception:
+        # Busca admin_password en varios niveles para mayor compatibilidad
+        admin_pwd = (
+            st.secrets.get("admin_password")
+            or st.secrets.get("email", {}).get("admin_password")
+        )
+        if not admin_pwd:
             st.error(
-                "No se encontró `admin_password` en los secrets de Streamlit. "
-                "Configúralo en el panel de Streamlit Cloud."
+                "No se encontró `admin_password` en los secrets de Streamlit.  \n"
+                "Añade esta línea en el panel de Streamlit Cloud → Settings → Secrets:  \n"
+                "```\nadmin_password = \"tu_contraseña\"\n```"
             )
             return False
 
