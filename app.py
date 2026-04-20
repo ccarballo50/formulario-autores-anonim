@@ -194,17 +194,31 @@ else:
 
     # ── Autenticación ─────────────────────────────────────────────────────────
     def check_password() -> bool:
-        # Busca admin_password en varios niveles para mayor compatibilidad
-        admin_pwd = (
-            st.secrets.get("admin_password")
-            or st.secrets.get("email", {}).get("admin_password")
-        )
+        # Debug: mostrar claves disponibles en secrets
+        try:
+            claves_raiz = list(st.secrets.keys())
+        except Exception:
+            claves_raiz = ["(error leyendo secrets)"]
+
+        # Buscar admin_password en todos los niveles posibles
+        admin_pwd = None
+        try:
+            admin_pwd = st.secrets["admin_password"]
+        except Exception:
+            pass
         if not admin_pwd:
-            st.error(
-                "No se encontró `admin_password` en los secrets de Streamlit.  \n"
-                "Añade esta línea en el panel de Streamlit Cloud → Settings → Secrets:  \n"
-                "```\nadmin_password = \"tu_contraseña\"\n```"
-            )
+            try:
+                admin_pwd = st.secrets["email"]["admin_password"]
+            except Exception:
+                pass
+
+        if not admin_pwd:
+            st.error("No se encontró `admin_password`.")
+            st.write("**Claves raíz disponibles en secrets:**", claves_raiz)
+            try:
+                st.write("**Contenido [email]:**", dict(st.secrets["email"]))
+            except Exception:
+                st.write("No existe sección [email]")
             return False
 
         if st.session_state.get("admin_auth"):
